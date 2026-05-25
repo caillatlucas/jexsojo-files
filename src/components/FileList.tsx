@@ -145,7 +145,10 @@ export default function FileList({ isAdmin, refreshTrigger = 0 }: { isAdmin?: bo
     <div>
       <div className="bg-[#f1f6fb] p-6 mb-8 border border-[#e1ebf4]">
         <h2 className="text-xl font-bold text-[#002244] mb-2">Search Full Library</h2>
-        <div className="w-8 h-1 bg-[#D4AF37] mb-6"></div>
+        <div className="flex flex-col gap-[2px] mb-6">
+          <div className="w-14 h-[3px] bg-[#D4AF37]"></div>
+          <div className="w-14 h-[1px] bg-[#D4AF37]"></div>
+        </div>
         <form onSubmit={handleSearch} className="flex max-w-2xl">
           <input 
             type="text" 

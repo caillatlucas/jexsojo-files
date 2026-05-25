@@ -48,7 +48,10 @@ export default function Home() {
           <h1 className="text-[40px] font-serif text-[#002244] mb-6">
             JexSoJo Library
           </h1>
-          <div className="w-12 h-1 bg-[#D4AF37] mb-8"></div>
+          <div className="flex flex-col gap-[2px] mb-8">
+            <div className="w-14 h-[3px] bg-[#D4AF37]"></div>
+            <div className="w-14 h-[1px] bg-[#D4AF37]"></div>
+          </div>
           
           <div className="flex justify-between items-center">
             <button onClick={handleShare} className="flex items-center gap-2 bg-[#005e8d] hover:bg-[#004b70] text-white px-4 py-2 font-bold text-sm transition-colors">
@@ -104,9 +107,12 @@ export default function Home() {
         {/* Privacy Notice Panel */}
         <div className="bg-[#f1f6fb] p-8 mb-12">
           <h2 className="text-2xl font-serif text-[#002244] mb-4">Privacy Notice</h2>
-          <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
+          <div className="flex flex-col gap-[2px] mb-6">
+            <div className="w-14 h-[3px] bg-[#D4AF37]"></div>
+            <div className="w-14 h-[1px] bg-[#D4AF37]"></div>
+          </div>
           <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
-            In view of the Congressional deadline, all reasonable efforts have been made to review and redact personal information pertaining to victims, other private individuals, and protect sensitive materials from disclosure. That said, because of the volume of information involved, this website may nevertheless contain information that inadvertently includes non-public personally identifiable information or other sensitive content, to include matters of a sexual nature. In the event a member of the public identifies any information that should not have been posted, please notify us immediately by email so we can take steps to correct the problem as soon as possible.
+            In view of the Congressional deadline, all reasonable efforts have been made to review and redact personal information pertaining to victims, other private individuals, and protect sensitive materials from disclosure. That said, because of the volume of information involved, this website may nevertheless contain information that inadvertently includes non-public personally identifiable information or other sensitive content, to include matters of a sexual nature. In the event a member of the public identifies any information that should not have been posted, please notify us immediately by email at <a href="mailto:contact@jexsojofiles.fake" className="text-blue-700 underline font-semibold">contact@jexsojofiles.fake</a> (<em>Note: This is a completely fictitious website created for demonstration purposes</em>) so we can take steps to correct the problem as soon as possible.
           </p>
           <p className="text-[15px] font-bold italic text-[#002244] mt-6">
             This site houses materials responsive under the Transparency Act. This site will be updated if additional documents are identified for release.

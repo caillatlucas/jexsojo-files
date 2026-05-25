@@ -18,7 +18,7 @@ export default function Header() {
         {/* Logo and Title */}
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 shrink-0">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Seal_of_the_United_States_Department_of_Justice.svg" alt="Department of Justice Seal" className="w-full h-full object-contain drop-shadow-md" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Seal_of_the_United_States_Department_of_Justice.svg/250px-Seal_of_the_United_States_Department_of_Justice.svg.png" alt="Department of Justice Seal" className="w-full h-full object-contain drop-shadow-md" />
           </div>
           
           <div className="text-left">
