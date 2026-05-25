@@ -112,10 +112,17 @@ export default function Home() {
             <div className="w-14 h-[1px] bg-[#D4AF37]"></div>
           </div>
           <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
-            In view of the Congressional deadline, all reasonable efforts have been made to review and redact personal information pertaining to victims, other private individuals, and protect sensitive materials from disclosure. That said, because of the volume of information involved, this website may nevertheless contain information that inadvertently includes non-public personally identifiable information or other sensitive content, to include matters of a sexual nature. In the event a member of the public identifies any information that should not have been posted, please notify us immediately by email at <a href="mailto:contact@jexsojofiles.fake" className="text-blue-700 underline font-semibold">contact@jexsojofiles.fake</a> (<em>Note: This is a completely fictitious website created for demonstration purposes</em>) so we can take steps to correct the problem as soon as possible.
+            Ce site web a été conçu sous la forme d'un portail d'archives sécurisé, simulant la publication officielle de documents déclassifiés par la division criminelle du Department of Justice (DOJ) et les autorités internationales (INTERPOL), dans le cadre de la loi sur la liberté d'information (FOIA).
+          </p>
+          <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
+            L'interface intègre un avertissement de confidentialité réglementaire (Privacy Notice) indiquant que les pièces présentées ont fait l'objet d'un examen strict afin de censurer les données personnelles sensibles, tout en garantissant la transparence des éléments de preuve requis par l'acte judiciaire.
+          </p>
+          <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
+            <strong>Résumé de l'affaire : L'enquête criminelle transfrontalière &quot;Joshua Allanic - Faro 2025&quot;</strong><br />
+            Les dossiers numériques et rapports PDF téléchargeables sur ce site retracent le déroulement d'une instruction judiciaire complexe liée à des événements survenus en août 2025 à Faro, dans la région de l'Algarve au Portugal, au cours d'un voyage de vacances.
           </p>
           <p className="text-[15px] font-bold italic text-[#002244] mt-6">
-            This site houses materials responsive under the Transparency Act. This site will be updated if additional documents are identified for release.
+            Pour toute demande ou signalement, veuillez nous contacter par e-mail à : <a href="mailto:caillatlucas2304@gmail.com" className="text-blue-700 underline font-semibold">caillatlucas2304@gmail.com</a>
           </p>
         </div>
 
