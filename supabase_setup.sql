@@ -35,3 +35,10 @@ ON storage.objects FOR SELECT USING (bucket_id = 'jexsojo-bucket');
 
 CREATE POLICY "Upload public des fichiers" 
 ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'jexsojo-bucket');
+
+-- 6. Autoriser la suppression de fichiers (pour le mode Admin)
+CREATE POLICY "Suppression autorisée (Demo)" 
+ON public.jexsojo_files FOR DELETE USING (true);
+
+CREATE POLICY "Suppression des fichiers Storage" 
+ON storage.objects FOR DELETE USING (bucket_id = 'jexsojo-bucket');

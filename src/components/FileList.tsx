@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { FileText, Download, Image as ImageIcon } from 'lucide-react';
+import { FileText, Download, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 type JexsojoFile = {
   id: string;
@@ -13,10 +13,11 @@ type JexsojoFile = {
   created_at: string;
 };
 
-export default function FileList() {
+export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
   const [files, setFiles] = useState<JexsojoFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All Disclosures');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFiles();
@@ -25,8 +26,8 @@ export default function FileList() {
     const handleHashChange = () => {
       const hash = window.location.hash;
       if (hash === '#category-images') setActiveCategory('Images & Media');
-      else if (hash === '#category-documents') setActiveCategory('Legal Documents');
-      else if (hash === '#category-recent') setActiveCategory('Recently Added');
+      else if (hash === '#category-documents') setActiveCategory('Our Work (Documents)');
+      else if (hash === '#category-recent') setActiveCategory('Recently Added (News)');
       else setActiveCategory('All Disclosures');
     };
 
@@ -35,8 +36,12 @@ export default function FileList() {
 
     const channel = supabase
       .channel('public:jexsojo_files')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jexsojo_files' }, payload => {
-        setFiles(current => [payload.new as JexsojoFile, ...current]);
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jexsojo_files' }, payload => {
+        if (payload.eventType === 'INSERT') {
+          setFiles(current => [payload.new as JexsojoFile, ...current]);
+        } else if (payload.eventType === 'DELETE') {
+          setFiles(current => current.filter(f => f.id !== payload.old.id));
+        }
       })
       .subscribe();
 
@@ -53,16 +58,40 @@ export default function FileList() {
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (error) {
-        // If DB doesn't exist yet, we will just silently fail and show empty state
-        console.error('Database connection error:', error);
-      }
-      
+      if (error) console.error('Database connection error:', error);
       if (data) setFiles(data);
     } catch (error) {
       console.error('Error fetching files:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(file: JexsojoFile) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer définitivement "${file.file_name}" ?`)) return;
+    
+    setDeletingId(file.id);
+    try {
+      // 1. Delete from DB
+      const { error: dbError } = await supabase
+        .from('jexsojo_files')
+        .delete()
+        .eq('id', file.id);
+      
+      if (dbError) throw dbError;
+
+      // 2. Extract path from URL to delete from storage
+      const urlParts = file.file_url.split('/jexsojo-bucket/');
+      if (urlParts.length > 1) {
+        const filePath = urlParts[1];
+        await supabase.storage.from('jexsojo-bucket').remove([filePath]);
+      }
+      
+    } catch (err: any) {
+      console.error(err);
+      alert("Erreur lors de la suppression: " + err.message + "\n\nAvez-vous mis à jour la politique SQL DELETE (RLS) ?");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -75,61 +104,85 @@ export default function FileList() {
   };
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <ImageIcon className="w-6 h-6 text-blue-500" />;
-    return <FileText className="w-6 h-6 text-gray-500" />;
+    if (type.startsWith('image/')) return <ImageIcon className="w-6 h-6 text-[#005e8d]" />;
+    return <FileText className="w-6 h-6 text-gray-600" />;
   };
 
-  // Filter files based on active category
   const filteredFiles = files.filter(file => {
     if (activeCategory === 'Images & Media') return file.file_type.startsWith('image/');
-    if (activeCategory === 'Legal Documents') return file.file_type.includes('pdf') || file.file_type.includes('document') || file.file_type.includes('text');
-    if (activeCategory === 'Recently Added') {
+    if (activeCategory === 'Our Work (Documents)') return file.file_type.includes('pdf') || file.file_type.includes('document') || file.file_type.includes('text');
+    if (activeCategory === 'Recently Added (News)') {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       return new Date(file.created_at) >= oneWeekAgo;
     }
-    return true; // All
+    return true; 
   });
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading disclosures...</div>;
+  if (loading) return <div className="p-12 text-center text-gray-500">Loading library contents...</div>;
 
   return (
     <div>
-      <h3 className="font-serif text-xl text-doj-navy border-b pb-2 mb-4">
-        {activeCategory} ({filteredFiles.length})
+      <div className="bg-[#f1f6fb] p-6 mb-8 border border-[#e1ebf4]">
+        <h2 className="text-xl font-bold text-[#002244] mb-2">Search Full Library</h2>
+        <div className="w-8 h-1 bg-[#D4AF37] mb-6"></div>
+        <div className="flex max-w-2xl">
+          <input type="text" placeholder="Type to search..." className="flex-grow px-4 py-2 border border-gray-400 focus:outline-none" />
+          <button className="bg-[#005e8d] hover:bg-[#004b70] text-white px-6 py-2 font-bold transition-colors">Search</button>
+        </div>
+        <p className="text-xs text-gray-500 mt-4 italic">
+          <strong>Note on Search Functionality:</strong> Due to individual limitations and the format of certain materials (e.g. handwritten text), portions of these documents may not be electronically searchable.
+        </p>
+      </div>
+
+      <h3 className="font-serif text-2xl text-[#002244] mb-4">
+        {activeCategory} <span className="text-lg text-gray-400">({filteredFiles.length} files)</span>
       </h3>
       
       {filteredFiles.length === 0 ? (
-        <div className="p-8 text-center text-gray-500 bg-gray-50 rounded border border-dashed border-gray-300">
-          Aucun document trouvé pour cette catégorie.
+        <div className="p-8 text-center text-gray-500 border border-dashed border-gray-300">
+          No records found in this section.
         </div>
       ) : (
         <div className="space-y-4">
           {filteredFiles.map((file) => (
-            <div key={file.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded transition-colors group">
-              <div className="flex items-center gap-4 mb-3 sm:mb-0">
-                <div className="bg-white p-2 rounded shadow-sm border border-gray-200">
+            <div key={file.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
+              <div className="flex items-center gap-5 mb-4 sm:mb-0">
+                <div className="bg-[#f1f6fb] p-3 rounded-full">
                   {getFileIcon(file.file_type)}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-doj-navy break-all">{file.file_name}</h3>
-                  <div className="text-xs text-gray-500 flex gap-3 mt-1">
-                    <span>{new Date(file.created_at).toLocaleDateString()}</span>
-                    <span>•</span>
-                    <span>{formatSize(file.file_size)}</span>
+                  <h3 className="font-bold text-[17px] text-[#002244] hover:underline cursor-pointer break-all mb-1">{file.file_name}</h3>
+                  <div className="text-xs text-gray-500 flex gap-3">
+                    <span>Added: {new Date(file.created_at).toLocaleDateString()}</span>
+                    <span>|</span>
+                    <span>Size: {formatSize(file.file_size)}</span>
                   </div>
                 </div>
               </div>
               
-              <a 
-                href={file.file_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-doj-navy hover:bg-doj-navy/90 text-white px-4 py-2 rounded text-sm font-semibold transition-colors sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
-              >
-                <Download className="w-4 h-4" />
-                Download
-              </a>
+              <div className="flex gap-2 w-full sm:w-auto">
+                {isAdmin && (
+                  <button 
+                    onClick={() => handleDelete(file)}
+                    disabled={deletingId === file.id}
+                    className="flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded text-sm font-semibold transition-colors disabled:opacity-50 border border-red-200"
+                    title="Delete permanently"
+                  >
+                    {deletingId === file.id ? "..." : <Trash2 className="w-4 h-4" />}
+                  </button>
+                )}
+                
+                <a 
+                  href={file.file_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-[#002244] hover:bg-[#00152b] text-white px-5 py-2 rounded text-sm font-semibold transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  View / Download
+                </a>
+              </div>
             </div>
           ))}
         </div>
