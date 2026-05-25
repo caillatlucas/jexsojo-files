@@ -8,7 +8,7 @@ const merriweather = Merriweather({ subsets: ["latin"], weight: ["300", "400", "
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Les JexSoJo files",
+  title: "Department of Justice | JexSoJo Library",
   description: "Portail officiel de consultation des documents sous le Epstein Files Transparency Act (Factice)",
   icons: {
     icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Seal_of_the_United_States_Department_of_Justice.svg/250px-Seal_of_the_United_States_Department_of_Justice.svg.png',
