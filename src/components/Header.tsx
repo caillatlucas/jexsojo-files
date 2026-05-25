@@ -1,3 +1,5 @@
+"use client";
+
 import { Search, ChevronDown } from 'lucide-react';
 
 export default function Header() {
