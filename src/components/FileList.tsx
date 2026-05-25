@@ -13,15 +13,22 @@ type JexsojoFile = {
   created_at: string;
 };
 
-export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
+export default function FileList({ isAdmin, refreshTrigger = 0 }: { isAdmin?: boolean; refreshTrigger?: number }) {
   const [files, setFiles] = useState<JexsojoFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All Disclosures');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  
+  // Search state
+  const [searchInput, setSearchInput] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
 
+  // Re-fetch when refreshTrigger changes
   useEffect(() => {
     fetchFiles();
+  }, [refreshTrigger]);
 
+  useEffect(() => {
     // Listen to hash changes for category filtering
     const handleHashChange = () => {
       const hash = window.location.hash;
@@ -38,7 +45,11 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
       .channel('public:jexsojo_files')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'jexsojo_files' }, payload => {
         if (payload.eventType === 'INSERT') {
-          setFiles(current => [payload.new as JexsojoFile, ...current]);
+          // Verify it's not already in the list to avoid duplicates
+          setFiles(current => {
+            if (current.some(f => f.id === payload.new.id)) return current;
+            return [payload.new as JexsojoFile, ...current];
+          });
         } else if (payload.eventType === 'DELETE') {
           setFiles(current => current.filter(f => f.id !== payload.old.id));
         }
@@ -72,7 +83,6 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
     
     setDeletingId(file.id);
     try {
-      // 1. Delete from DB
       const { error: dbError } = await supabase
         .from('jexsojo_files')
         .delete()
@@ -80,7 +90,6 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
       
       if (dbError) throw dbError;
 
-      // 2. Extract path from URL to delete from storage
       const urlParts = file.file_url.split('/jexsojo-bucket/');
       if (urlParts.length > 1) {
         const filePath = urlParts[1];
@@ -89,7 +98,7 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
       
     } catch (err: any) {
       console.error(err);
-      alert("Erreur lors de la suppression: " + err.message + "\n\nAvez-vous mis à jour la politique SQL DELETE (RLS) ?");
+      alert("Erreur lors de la suppression: " + err.message);
     } finally {
       setDeletingId(null);
     }
@@ -108,7 +117,18 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
     return <FileText className="w-6 h-6 text-gray-600" />;
   };
 
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setActiveSearch(searchInput);
+  };
+
   const filteredFiles = files.filter(file => {
+    // 1. Search filter
+    if (activeSearch && !file.file_name.toLowerCase().includes(activeSearch.toLowerCase())) {
+      return false;
+    }
+    
+    // 2. Category filter
     if (activeCategory === 'Images & Media') return file.file_type.startsWith('image/');
     if (activeCategory === 'Our Work (Documents)') return file.file_type.includes('pdf') || file.file_type.includes('document') || file.file_type.includes('text');
     if (activeCategory === 'Recently Added (News)') {
@@ -126,10 +146,22 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
       <div className="bg-[#f1f6fb] p-6 mb-8 border border-[#e1ebf4]">
         <h2 className="text-xl font-bold text-[#002244] mb-2">Search Full Library</h2>
         <div className="w-8 h-1 bg-[#D4AF37] mb-6"></div>
-        <div className="flex max-w-2xl">
-          <input type="text" placeholder="Type to search..." className="flex-grow px-4 py-2 border border-gray-400 focus:outline-none" />
-          <button className="bg-[#005e8d] hover:bg-[#004b70] text-white px-6 py-2 font-bold transition-colors">Search</button>
-        </div>
+        <form onSubmit={handleSearch} className="flex max-w-2xl">
+          <input 
+            type="text" 
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Type to search..." 
+            className="flex-grow px-4 py-2 border border-gray-400 focus:outline-none text-black" 
+          />
+          <button type="submit" className="bg-[#005e8d] hover:bg-[#004b70] text-white px-6 py-2 font-bold transition-colors">Search</button>
+        </form>
+        {activeSearch && (
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-sm font-semibold">Results for "{activeSearch}"</span>
+            <button onClick={() => { setSearchInput(''); setActiveSearch(''); }} className="text-xs text-blue-600 hover:underline">(Clear search)</button>
+          </div>
+        )}
         <p className="text-xs text-gray-500 mt-4 italic">
           <strong>Note on Search Functionality:</strong> Due to individual limitations and the format of certain materials (e.g. handwritten text), portions of these documents may not be electronically searchable.
         </p>
@@ -141,7 +173,7 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
       
       {filteredFiles.length === 0 ? (
         <div className="p-8 text-center text-gray-500 border border-dashed border-gray-300">
-          No records found in this section.
+          No records found matching these criteria.
         </div>
       ) : (
         <div className="space-y-4">
@@ -152,7 +184,9 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
                   {getFileIcon(file.file_type)}
                 </div>
                 <div>
-                  <h3 className="font-bold text-[17px] text-[#002244] hover:underline cursor-pointer break-all mb-1">{file.file_name}</h3>
+                  <a href={file.file_url} target="_blank" rel="noopener noreferrer" className="font-bold text-[17px] text-[#002244] hover:underline break-all mb-1 block">
+                    {file.file_name}
+                  </a>
                   <div className="text-xs text-gray-500 flex gap-3">
                     <span>Added: {new Date(file.created_at).toLocaleDateString()}</span>
                     <span>|</span>
@@ -180,7 +214,7 @@ export default function FileList({ isAdmin }: { isAdmin?: boolean }) {
                   className="flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-[#002244] hover:bg-[#00152b] text-white px-5 py-2 rounded text-sm font-semibold transition-colors"
                 >
                   <Download className="w-4 h-4" />
-                  View / Download
+                  Download
                 </a>
               </div>
             </div>

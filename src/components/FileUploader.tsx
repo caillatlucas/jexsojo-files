@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { UploadCloud, Loader2, AlertCircle } from 'lucide-react';
 
-export default function FileUploader() {
+export default function FileUploader({ onUploadSuccess }: { onUploadSuccess?: () => void }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
@@ -23,12 +23,11 @@ export default function FileUploader() {
 
       setUploading(true);
       
-      // 1. Upload file to Supabase Storage (requires a 'jexsojo-bucket' bucket)
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       const filePath = `public/${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('jexsojo-bucket')
         .upload(filePath, file);
 
@@ -42,12 +41,10 @@ export default function FileUploader() {
         throw uploadError;
       }
 
-      // 2. Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('jexsojo-bucket')
         .getPublicUrl(filePath);
 
-      // 3. Insert record into database
       const { error: dbError } = await supabase
         .from('jexsojo_files')
         .insert({
@@ -65,6 +62,7 @@ export default function FileUploader() {
       }
       
       setSuccess(true);
+      if (onUploadSuccess) onUploadSuccess();
       
       // Reset input
       event.target.value = '';

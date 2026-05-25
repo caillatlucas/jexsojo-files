@@ -10,6 +10,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   title: "Les JexSoJo files",
   description: "Portail officiel de consultation des documents sous le Epstein Files Transparency Act (Factice)",
+  icons: {
+    icon: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Seal_of_the_United_States_Department_of_Justice.svg',
+  },
 };
 
 export default function RootLayout({

@@ -11,6 +11,7 @@ export default function Home() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,12 +26,17 @@ export default function Home() {
     }
   };
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard!');
+  };
+
   return (
     <div className="bg-white min-h-screen">
       {/* Breadcrumb */}
       <div className="border-b border-gray-200 bg-white">
         <div className="container mx-auto px-4 py-3 flex items-center text-sm text-gray-500">
-          <a href="#" className="text-blue-700 hover:underline">Justice.gov</a>
+          <a href="https://www.justice.gov" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Justice.gov</a>
           <ChevronRight className="w-4 h-4 mx-2" />
           <span className="text-gray-700">JexSoJo Library</span>
         </div>
@@ -45,7 +51,7 @@ export default function Home() {
           <div className="w-12 h-1 bg-[#D4AF37] mb-8"></div>
           
           <div className="flex justify-between items-center">
-            <button className="flex items-center gap-2 bg-[#005e8d] hover:bg-[#004b70] text-white px-4 py-2 font-bold text-sm transition-colors">
+            <button onClick={handleShare} className="flex items-center gap-2 bg-[#005e8d] hover:bg-[#004b70] text-white px-4 py-2 font-bold text-sm transition-colors">
               Share <span className="border-l border-white/30 pl-2 ml-1"><ChevronRight className="w-4 h-4" /></span>
             </button>
 
@@ -110,13 +116,13 @@ export default function Home() {
         {/* Upload Section (Admin only) */}
         {isAdmin && (
           <div className="mb-12">
-            <FileUploader />
+            <FileUploader onUploadSuccess={() => setRefreshTrigger(prev => prev + 1)} />
           </div>
         )}
 
         {/* File List */}
         <div>
-          <FileList isAdmin={isAdmin} />
+          <FileList isAdmin={isAdmin} refreshTrigger={refreshTrigger} />
         </div>
       </div>
     </div>
