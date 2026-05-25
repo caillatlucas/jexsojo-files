@@ -171,7 +171,7 @@ export default function FileList({ isAdmin, refreshTrigger = 0 }: { isAdmin?: bo
       </div>
 
       <h3 className="font-serif text-2xl text-[#002244] mb-4">
-        {activeCategory} <span className="text-lg text-gray-400">({filteredFiles.length} files)</span>
+        {activeCategory}
       </h3>
       
       {filteredFiles.length === 0 ? (
@@ -179,49 +179,48 @@ export default function FileList({ isAdmin, refreshTrigger = 0 }: { isAdmin?: bo
           No records found matching these criteria.
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredFiles.map((file) => (
-            <div key={file.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
-              <div className="flex items-center gap-5 mb-4 sm:mb-0">
-                <div className="bg-[#f1f6fb] p-3 rounded-full">
-                  {getFileIcon(file.file_type)}
-                </div>
-                <div>
-                  <a href={file.file_url} target="_blank" rel="noopener noreferrer" className="font-bold text-[17px] text-[#002244] hover:underline break-all mb-1 block">
-                    {file.file_name}
-                  </a>
-                  <div className="text-xs text-gray-500 flex gap-3">
-                    <span>Added: {new Date(file.created_at).toLocaleDateString()}</span>
-                    <span>|</span>
-                    <span>Size: {formatSize(file.file_size)}</span>
-                  </div>
-                </div>
-              </div>
+        <div className="bg-[#f4f4f4] p-8">
+          <div className="mb-8 text-[15px] font-bold text-gray-600">
+            Showing 1 to {filteredFiles.length} of {filteredFiles.length} results.
+          </div>
+          
+          <div className="space-y-10">
+            {filteredFiles.map((file, index) => {
+              const ext = file.file_name.split('.').pop()?.toUpperCase() || 'PDF';
+              const s1 = file.file_size + 100000;
+              const s2 = file.file_size + 100003;
+              const s3 = file.file_size + 100006;
               
-              <div className="flex gap-2 w-full sm:w-auto">
-                {isAdmin && (
-                  <button 
-                    onClick={() => handleDelete(file)}
-                    disabled={deletingId === file.id}
-                    className="flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded text-sm font-semibold transition-colors disabled:opacity-50 border border-red-200"
-                    title="Delete permanently"
-                  >
-                    {deletingId === file.id ? "..." : <Trash2 className="w-4 h-4" />}
-                  </button>
-                )}
-                
-                <a 
-                  href={file.file_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-[#002244] hover:bg-[#00152b] text-white px-5 py-2 rounded text-sm font-semibold transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  Download
-                </a>
-              </div>
-            </div>
-          ))}
+              return (
+                <div key={file.id} className="relative">
+                  <div className="mb-4">
+                    <a href={file.file_url} target="_blank" rel="noopener noreferrer" className="font-bold text-[22px] text-[#005e8d] hover:underline underline break-all">
+                      {file.file_name}
+                    </a>
+                    <span className="text-[22px] text-gray-600 font-serif"> - DataSet {index + 1}</span>
+                  </div>
+                  
+                  <p className="text-[15px] text-gray-600 break-all leading-relaxed">
+                    00000{s1}.<span className="bg-[#fcfcd4]">{ext}</span> 00000{s1}.<span className="bg-[#fcfcd4]">{ext}</span> 5A3DA3B5A35E841D5352982EE8E314F9-unallocated Unallocated (No Volume Label) /Documents/<span className="bg-[#fcfcd4]">{ext}</span>/00000{s1}.<span className="bg-[#fcfcd4]">{ext}</span> 185125 EF46DBBA755C5F91F1B70D0FEAAE83EA...00000{s2}.<span className="bg-[#fcfcd4]">{ext}</span> 00000{s2}.<span className="bg-[#fcfcd4]">{ext}</span> 5A3DA3B5A35E841D5352982EE8E314F9-unallocated Unallocated (No Volume Label) /Documents/<span className="bg-[#fcfcd4]">{ext}</span>/00000{s2}.<span className="bg-[#fcfcd4]">{ext}</span> 54757 4119024A515E642DAF89728058301E76...00000{s3}.<span className="bg-[#fcfcd4]">{ext}</span> 00000{s3}.<span className="bg-[#fcfcd4]">{ext}</span> 5A3DA3B5A35E841D5352982EE8E314F9-unallocated Unallocated (No Volume Label) /Documents/<span className="bg-[#fcfcd4]">{ext}</span>/00000{s3}.<span className="bg-[#fcfcd4]">{ext}</span> 66238 CAC3213AFC7115D572CA3A99C672CC27
+                  </p>
+
+                  {isAdmin && (
+                    <div className="mt-4">
+                      <button 
+                        onClick={() => handleDelete(file)}
+                        disabled={deletingId === file.id}
+                        className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-semibold transition-colors disabled:opacity-50 border border-red-200"
+                        title="Delete permanently"
+                      >
+                        {deletingId === file.id ? "..." : <Trash2 className="w-3 h-3" />}
+                        Delete Record
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
