@@ -15,11 +15,11 @@ export default function Footer() {
         {/* Top Section */}
         <div className="flex flex-col items-center mb-12">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-[#D4AF37] rounded-full flex items-center justify-center text-[#002244] font-bold text-xs text-center shrink-0 border-2 border-white/20 relative overflow-hidden">
-              <div className="absolute inset-1 border border-white/40 rounded-full flex items-center justify-center">
-                 DOJ
-              </div>
-            </div>
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Seal_of_the_United_States_Department_of_Justice.svg" 
+              alt="U.S. Department of Justice Seal" 
+              className="w-[5.5rem] h-[5.5rem] shrink-0 object-contain"
+            />
             <h2 className="flex flex-col font-serif text-white m-0">
               <span className="text-lg font-normal tracking-wide">U.S. Department of</span>
               <span className="text-[2.5rem] leading-none tracking-wider">JUSTICE</span>
