@@ -1,3 +1,5 @@
+"use client";
+
 import { Mail, Phone, Smartphone, ExternalLink, ChevronUp, Facebook, Youtube, Instagram, Linkedin, Twitter } from 'lucide-react';
 
 export default function Footer() {
