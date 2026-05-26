@@ -16,7 +16,7 @@ export default function Footer() {
         <div className="flex flex-col items-center mb-12">
           <div className="flex items-center gap-4">
             <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Seal_of_the_United_States_Department_of_Justice.svg" 
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Seal_of_the_United_States_Department_of_Justice.svg/250px-Seal_of_the_United_States_Department_of_Justice.svg.png" 
               alt="U.S. Department of Justice Seal" 
               className="w-[5.5rem] h-[5.5rem] shrink-0 object-contain"
             />
